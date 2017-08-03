@@ -132,14 +132,14 @@ class ModelMetaclass(type):
         # 保存主键外的属性名
         attrs['__fields__'] = fields
         attrs['__select__'] = 'select `%s` ,%s from `%s`' % (primaryKey,','.join(escaped_fields),table_name)
-        attrs['__insert__'] = 'inser into `%s` (%s,`%s`) values (%s) ' % (table_name,','.join(escaped_fields),primaryKey,create_args_string(len(escaped_fields)+1))
+        attrs['__insert__'] = 'insert into `%s` (%s,`%s`) values (%s) ' % (table_name,','.join(escaped_fields),primaryKey,create_args_string(len(escaped_fields)+1))
         attrs['__update__'] = 'update `%s` set %s where `%s` = ?' % (table_name, ', '.join(map(lambda f: '`%s`=?' % (mappings.get(f).name or f), fields)), primaryKey)
         attrs['__delete__'] = 'delete `%s` where `%s`=?' % (table_name, primaryKey)
         return type.__new__(cls,name,bases,attrs)
 
 class Model(dict,metaclass=ModelMetaclass):
-    def __init__(self):
-        super(Model,self).__init__()
+    def __init__(self,**kw):
+        super(Model,self).__init__(**kw)
     def __getattr__(self, key):
         try:
             return self[key]
@@ -147,8 +147,9 @@ class Model(dict,metaclass=ModelMetaclass):
             raise AttributeError("'Model' object have no attribution: %s"% key)
     def __setattr__(self, key, value):
         self[key]=value
-    def get_value(self,key):
+    def getValue(self,key):
         return getattr(self,key,None)
+
     def getValueOrDefault(self,key):
         value = getattr(self,key,None)
         if value is None:
@@ -217,9 +218,12 @@ class Model(dict,metaclass=ModelMetaclass):
         return rs
 
     async def save(self):
+        #  print(self.getValueOrDefault(self.__primary_key__))
         args = list(map(self.getValueOrDefault, self.__fields__))
+
         print('save:%s' % args)
         args.append(self.getValueOrDefault(self.__primary_key__))
+      #  print(self.__insert__,args)
         rows = await execute(self.__insert__, args)
         if rows != 1:
             print(self.__insert__)
@@ -242,10 +246,10 @@ class Model(dict,metaclass=ModelMetaclass):
 #if __name__ == "__main__":
 class User(Model):
     __table__ = 'users'
-    id = IntegerField('id', primary_key=True)
-    name = StringField('username')
-    email = StringField('email')
-    password = StringField('password')
+    id = IntegerField(name='id', primary_key=True)
+    name = StringField(name='username')
+    email = StringField(name='email')
+    password = StringField(name='password')
 
 
     # 创建异步事件的句柄
@@ -257,15 +261,16 @@ loop = asyncio.get_event_loop()
 async def test():
     await create_pool(loop=loop, host='localhost', user='lrnsql', password='950314', db='bank')
     user = User(id=8, name='sly', email='slysly759@gmail.com', password='fuckblog')
+
     await user.save()
-    r = await User.find('11')
+'''    r = await User.find('11')
     print(r)
     r = await User.findAll()
     print(1, r)
     r = await User.findAll(id='12')
     print(2, r)
     #await destroy_pool()
-
-
-loop.run_until_complete(test())
+'''
+u=test()
+loop.run_until_complete(u)
 loop.close()
