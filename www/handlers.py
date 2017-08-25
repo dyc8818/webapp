@@ -73,13 +73,15 @@ def check_admin(request):
 
 
 @get('/')
-def index(request):
+async def index(request):
     summary = 'Hello,World.'
-    blogs = [
+    blogs = await Blog.findAll(orderBy='created_at desc')
+    ''' [
         Blog(id='1', name='Test Blog', summary=summary, create_at=time.time() - 120),
         Blog(id='2', name='Something New', summary=summary, create_at=time.time() - 3600),
         Blog(id='3', name='Learn Swift', summary=summary, create_at=time.time() - 7200)
     ]
+    '''
     return {
         '__template__': 'blogs.html',
         'blogs': blogs,

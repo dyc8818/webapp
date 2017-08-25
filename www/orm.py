@@ -40,7 +40,7 @@ async def create_pool(loop, **kw):
    # await __pool.wait_closed()
 
 #loop = asyncio.get_event_loop()
-#a=create_pool(loop,user='lrnsql',password='950314',db='bank')
+#a=await create_pool(loop,user='lrnsql',password='950314',db='bank')
 #loop.run_until_complete(a)
 '''
 

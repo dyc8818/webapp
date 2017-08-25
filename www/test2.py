@@ -15,7 +15,7 @@ async def init(loop):
     app = web.Application(loop=loop, middlewares=[auth_factory, logger_factory, response_factory])
 
     init_jinja2(app, filters=dict(datetime=datetime_filter),
-                path=r"E:\python_workspace\awesome-python3-webapp\www\templates")  # 初始化Jinja2，这里值得注意是设置文件路径的path参数
+                path=r"./templates")  # 初始化Jinja2，这里值得注意是设置文件路径的path参数
     coreweb.add_routes(app, 'handlers')
     coreweb.add_static(app)
     srv = await loop.create_server(app.make_handler(), '127.0.0.1', 9900)
